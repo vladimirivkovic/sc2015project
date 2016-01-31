@@ -64,13 +64,13 @@ def minOV(s1, s2):
     if s1[1] < s2[0] or s1[0] > s2[1]:
         return 0
     else:
-        return min(s1[1], s2[1]) - max(s1[0], s2[0])
+        return float(min(s1[1], s2[1]) - max(s1[0], s2[0]))
 
 def maxOV(s1, s2):
     if s1[1] < s2[0] or s1[0] > s2[1]:
         return 0
     else:
-        return max(s1[1], s2[1]) - min(s1[0], s2[0])
+        return float(max(s1[1], s2[1]) - min(s1[0], s2[0]))
 
 def delta(s1, s2):
     return min(maxOV(s1, s2) - minOV(s1, s2), minOV(s1, s2), int(0.5*(s1[1] - s1[0] + 1)), int(0.5*(s2[1] - s2[0] + 1)))
@@ -86,6 +86,8 @@ def calcSOV(pred, sec, dssp):
         N += s1[1] - s1[0] + 1
         for s2 in sgmts2:
             if maxOV(s1, s2) > 0:
-                sov += (minOV(s1, s2) + delta(s1, s2))/maxOV(s1, s2)
+                sov += (minOV(s1, s2) + delta(s1, s2))*(s1[1] - s1[0] + 1)/maxOV(s1, s2)
     
-    return sov/N
+    if N == 0:
+        return None
+    return sov/N * 100

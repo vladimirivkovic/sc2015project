@@ -2,11 +2,10 @@ import svm3psp
 
 step = 50
 
-
 # sliding window
-for sw in range(5, 17, 2):
+for sw in range(11, 12, 2):
     # number of samples for file
-    x = 40
+    x = 30
     
     print 'sw = ' + str(sw)
     
@@ -20,7 +19,7 @@ for sw in range(5, 17, 2):
         svm3psp.saveSVM(clf, filename)
     
     z = x + step
-    while z < 500:
+    while z < 300:
         rslt = svm3psp.test_SVM_3(clf, z, x, sw)
         z += step
         x += step

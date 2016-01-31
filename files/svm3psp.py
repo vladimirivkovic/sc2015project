@@ -60,8 +60,12 @@ def test_SVM_3(clf, z, x, sw):
             qep += measurePrediction.calcQpred(pred, sec, 'E')
             qc += measurePrediction.calcQ(pred, sec, 'C')
             qcp += measurePrediction.calcQpred(pred, sec, 'C')
+            
+            sovh = measurePrediction.calcSOV(pred, sec, 'H')
+            sove = measurePrediction.calcSOV(pred, sec, 'E')
+            sovc = measurePrediction.calcSOV(pred, sec, 'C')
 
-    return (qh/z, qhp/z, qe/z, qep/z, qc/z, qcp/z)
+    return (qh/z, qhp/z, qe/z, qep/z, qc/z, qcp/z, sovh, sove, sovc)
     
 def saveSVM(clf, filename):
     joblib.dump(clf, filename)
