@@ -38,3 +38,5 @@ for x in proteins:
     
     if len(proteins[x]["prim"]) != len(proteins[x]["sec"]):
         print('error')
+
+f3.close()

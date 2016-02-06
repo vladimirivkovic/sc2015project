@@ -11,12 +11,12 @@ from sklearn.externals import joblib
 import numpy as np
 import codes
 
-def make_SVM_3(sw, x):
+def make_SVM_3(sw, x, filename):
     inputs_train = []
     outputs_train = []
 
     #read dataset file
-    f = open('dataSet.txt', 'r')
+    f = open(filename, 'r')
     for i in range(x):
         f.readline()
         prim = f.readline().strip()
@@ -34,25 +34,26 @@ def make_SVM_3(sw, x):
     
     return clf
     
-def test_SVM_3(clf, z, x, sw):
-    f = open('dataSet.txt', 'r')
-    sum = 0    
+def test_SVM_3(clf, z, x, sw, filename):
+    f = open(filename, 'r')    
     qh = 0
     qhp = 0
     qe = 0
     qep = 0
     qc = 0
     qcp = 0
+    sovh, zh = 0, 0.01
+    sove, ze = 0, 0.01
+    sovc, zc = 0, 0.01
 
     for i in range(x+z):
         f.readline()
         prim = f.readline().strip()
         sec = f.readline().strip()
 
-        if i > x:
+        if i >= x:
             ins, outs = inOutFunctions.convert_input(sec, prim, sw)
             pred = inOutFunctions.display_result(clf.predict(np.array(ins, np.float32)), codes.alphabeth)
-            sum += measurePrediction.compare(pred, sec)
             
             qh += measurePrediction.calcQ(pred, sec, 'H')
             qhp += measurePrediction.calcQpred(pred, sec, 'H')
@@ -61,11 +62,23 @@ def test_SVM_3(clf, z, x, sw):
             qc += measurePrediction.calcQ(pred, sec, 'C')
             qcp += measurePrediction.calcQpred(pred, sec, 'C')
             
-            sovh = measurePrediction.calcSOV(pred, sec, 'H')
-            sove = measurePrediction.calcSOV(pred, sec, 'E')
-            sovc = measurePrediction.calcSOV(pred, sec, 'C')
+            _sovh = measurePrediction.calcSOV(pred, sec, 'H')
+            _sove = measurePrediction.calcSOV(pred, sec, 'E')
+            _sovc = measurePrediction.calcSOV(pred, sec, 'C')
+            
+            if _sovh != None:
+                sovh += _sovh
+                zh += 1
+            if _sove != None:
+                sove += _sove
+                ze += 1
+            if _sovc != None:
+                sovc += _sovc
+                zc += 1
+    
+    f.close()
 
-    return (qh/z, qhp/z, qe/z, qep/z, qc/z, qcp/z, sovh, sove, sovc)
+    return (qh/z, qhp/z, qe/z, qep/z, qc/z, qcp/z, sovh/zh, sove/ze, sovc/zc)
     
 def saveSVM(clf, filename):
     joblib.dump(clf, filename)

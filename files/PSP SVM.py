@@ -1,11 +1,13 @@
 import svm3psp
 
-step = 50
+step = 1
+
+dataset = 'rs126.fa'
 
 # sliding window
 for sw in range(11, 12, 2):
     # number of samples for file
-    x = 30
+    x = 50
     
     print 'sw = ' + str(sw)
     
@@ -15,16 +17,15 @@ for sw in range(11, 12, 2):
     if trained:
         clf = svm3psp.loadSVM(filename)
     else:
-        clf = svm3psp.make_SVM_3(sw, x)
-        svm3psp.saveSVM(clf, filename)
+        clf = svm3psp.make_SVM_3(sw, x, dataset)
+        #svm3psp.saveSVM(clf, filename)
     
-    z = x + step
-    while z < 300:
-        rslt = svm3psp.test_SVM_3(clf, z, x, sw)
-        z += step
+    while x < 100:
+        rslt = svm3psp.test_SVM_3(clf, step, x, sw, dataset)
         x += step
         
         print rslt
+    
 
 
 

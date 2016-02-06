@@ -76,11 +76,11 @@ def prepare_input_for2(sec, prim, sw, sx, sy, indexes):
         sec1 += sec[j]
     return (ins, outs, sec1)
 
-def make_SVM_1(sw, dssp, z):
+def make_SVM_1(sw, dssp, z, dataset):
     inputs_train = []
     outputs_train = []
 
-    f = open('dataSet.txt', 'r')
+    f = open(dataset, 'r')
     for i in range(z):
         f.readline()
         prim = f.readline().strip()
@@ -100,105 +100,106 @@ def make_SVM_1(sw, dssp, z):
 
     
 sw = 7
-dssp = 'H'
-z = 100
+dssp = 'C'
+z = 70
 
-clfH = make_SVM_1(sw, dssp, z)
+clfH = make_SVM_1(sw, dssp, z, 'rs126.fa')
 
 def test_SMV_1(sw, dssp, w, clfx, z):
-    f = open('dataSet.txt', 'r')
+    f = open('rs126.fa', 'r')
 
     cq = 0
     cqp = 0
     
-    for i in range(z+w+2000):
+    for i in range(z+w):
         f.readline()
         prim = f.readline().strip()
         sec = f.readline().strip()
 
 
-        if i > z+2000:
+        if i > z:
             ins, outs = prepare_input_for(sec, prim, sw, dssp)
             pred = inOutFunctions.display_result(clfx.predict(np.array(ins, np.float32)), {0:'X', 1:dssp})
-#             print sec
-#             print pred
-#             print "\n"
+            print sec
+            print pred
+            print "\n"
             cq += measurePrediction.calcQ(pred, sec, dssp)
             cqp += measurePrediction.calcQpred(pred, sec, dssp)
 
     return (cq/w, cqp/w)
 
-w = 50
-test_SMV_1(sw, dssp, w, clfH, z)
-
-inputs_train = []
-outputs_train = []
-
-sx = 'E'
-sy = 'C'
-z = 50
-
-f = open('dataSet.txt', 'r')
-for i in range(z):
-    f.readline()
-    prim = f.readline().strip()
-    sec = f.readline().strip()
-    ins, outs, sec1 = prepare_input_for2(sec, prim, sw, sx, sy, None)
-    for q in ins:
-        inputs_train.append(q)
-    for q in outs:
-        outputs_train.append(q)
-    
-f.close()
-
-clf_EC = svm.SVC(C=1.5, gamma=0.1)
-clf_EC.fit(inputs_train, outputs_train)
-
-f = open('dataSet.txt', 'r')
-
-for i in range(z+5):
-    f.readline()
-    prim = f.readline()
-    sec = f.readline()
-
-    ins, outs, sec = prepare_input_for2(sec, prim, sw, sx, sy, None)
-
-    pred = inOutFunctions.display_result(clf_EC.predict(np.array(ins, np.float32)), {0:sy, 1:sx})
-    if i > z:
-        print sec
-        print pred
-        print measurePrediction.compare(sec, pred)
-
-f = open('dataSet.txt', 'r')
-
 w = 10
+print test_SMV_1(sw, dssp, w, clfH, z)
 
-for i in range(z+w):
-    f.readline()
-    prim = f.readline().strip()
-    sec = f.readline().strip()
-    
-    if i > z:
-        ins, outs = prepare_input_for(sec, prim, sw, dssp)
-        pred = clfH.predict(np.array(ins, np.float32))
-        ins, outs, sec1 = prepare_input_for2(sec, prim, sw, sx, sy, pred)
-        pred2 = clf_EC.predict(np.array(ins, np.float32))
-        
-        print sec
-
-        preds = ""
-        
-        t = 0
-        for i in range(len(pred)):
-            if pred[i] == 1:
-                preds += 'H'
-            else:
-                if pred2[t] == 0:
-                    preds += 'E'
-                else:
-                    preds += 'C'
-                t += 1
-        
-        print preds
-        
-        print measurePrediction.compare(sec, preds)
+#inputs_train = []
+#outputs_train = []
+#
+#sx = 'E'
+#sy = 'C'
+#z = 10
+#
+#f = open('rs126.fa', 'r')
+#for i in range(z):
+#    f.readline()
+#    prim = f.readline().strip()
+#    sec = f.readline().strip()
+#    ins, outs, sec1 = prepare_input_for2(sec, prim, sw, sx, sy, None)
+#    for q in ins:
+#        inputs_train.append(q)
+#    for q in outs:
+#        outputs_train.append(q)
+#    
+#f.close()
+#
+#clf_EC = svm.SVC(C=1.5, gamma=0.1)
+#clf_EC.fit(inputs_train, outputs_train)
+#
+#f = open('rs126.fa', 'r')
+#
+#for i in range(z+5):
+#    f.readline()
+#    prim = f.readline()
+#    sec = f.readline()
+#
+#    ins, outs, sec = prepare_input_for2(sec, prim, sw, sx, sy, None)
+#
+#    pred = inOutFunctions.display_result(clf_EC.predict(np.array(ins, np.float32)), {0:sy, 1:sx})
+#    if i > z:
+#        print sec
+#        print pred
+#        print measurePrediction.compare(sec, pred)
+#
+#
+#w = 10
+#
+#for i in range(z+w):
+#    f.readline()
+#    prim = f.readline().strip()
+#    sec = f.readline().strip()
+#    
+#    if i > z:
+#        ins, outs = prepare_input_for(sec, prim, sw, dssp)
+#        pred = clfH.predict(np.array(ins, np.float32))
+#        ins, outs, sec1 = prepare_input_for2(sec, prim, sw, sx, sy, pred)
+#        pred2 = clf_EC.predict(np.array(ins, np.float32))
+#        
+#        print sec
+#
+#        preds = ""
+#        
+#        t = 0
+#        for i in range(len(pred)):
+#            if pred[i] == 1:
+#                preds += 'H'
+#            else:
+#                if pred2[t] == 0:
+#                    preds += 'E'
+#                else:
+#                    preds += 'C'
+#                t += 1
+#        
+#       # print preds
+#        
+#        print measurePrediction.compare(sec, preds)
+#
+#f.close()
