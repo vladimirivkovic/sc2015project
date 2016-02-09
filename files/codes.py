@@ -39,3 +39,8 @@ alph = {}
 alph['H'] = 0
 alph['E'] = 1
 alph['C'] = 2
+
+alphNN = {}
+alphNN['H'] = [1, 0, 0]
+alphNN['E'] = [0, 1, 0]
+alphNN['C'] = [0, 0, 1]

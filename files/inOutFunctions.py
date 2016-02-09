@@ -69,3 +69,22 @@ def convert_inputX(sec, prim, sw):
         ins.append(np.array(inputs).flatten())
         outs.append(codes.alph[sec[j]])
     return (ins, outs)
+
+def convert_inputNN(sec, prim, sw):
+    length = len(sec)
+    sump = sum(prim[0])
+    
+    for q in range(sw/2):
+        prim.insert(0, sump*np.array(codes.aac[codes.rest]))
+        prim.append(sump*np.array(codes.aac[codes.rest]))
+    
+    ins = []
+    outs = []
+    
+    for j in range(length):
+        inputs = []
+        for k in range(j, j + sw):
+            inputs.append(prim[k])
+        ins.append(np.array(inputs).flatten())
+        outs.append(codes.alphNN[sec[j]])
+    return (ins, outs)

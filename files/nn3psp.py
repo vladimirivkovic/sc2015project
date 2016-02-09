@@ -34,6 +34,7 @@ def create_ann(hidden_neurons, sw):
     ann.add(Dense(input_dim=len(codes.aac)*sw, output_dim=hidden_neurons,init="glorot_uniform"))
     ann.add(Activation("sigmoid"))
     ann.add(Dense(input_dim=hidden_neurons, output_dim=len(codes.alphabeth),init="glorot_uniform"))
+    ann.add(Activation("sigmoid"))
     
     return ann
     
@@ -67,16 +68,18 @@ def make_NN(sw, x, filename):
             prim.append(f.readline().strip())
         sec = f.readline().strip()
         
-        ins, outs = inOutFunctions.convert_inputX(sec, prim, sw)
+        prim = inOutFunctions.merge_sequences(prim)
+        
+        #prim = "ADTRIG"
+        #sec = "CCEEEE"
+        
+        ins, outs = inOutFunctions.convert_inputNN(sec, prim, sw)
         for q in ins:
             inputs_train.append(q)
         for q in outs:
             outputs_train.append(q)
 
     f.close()
-    
-    print np.array(inputs_train, np.float32)
-    print np.array(outputs_train, np.float32)
 
     ann = train_ann(ann, inputs_train, outputs_train)
     
@@ -105,8 +108,13 @@ def test_NN(ann, z, x, sw, filename):
         sec = f.readline().strip()
 
         if i >= x:
-            ins, outs = inOutFunctions.convert_inputX(sec, prim, sw)
-            pred = inOutFunctions.display_result(ann.predict(np.array(ins, np.float32)), codes.alphabeth)
+            prim = inOutFunctions.merge_sequences(prim)
+            ins, outs = inOutFunctions.convert_inputNN(sec, prim, sw)
+            pred = ann.predict(np.array(ins, np.float32))
+            predx = []
+            for p in pred:
+                predx.append(winner(p))
+            pred = inOutFunctions.display_result(predx, codes.alphabeth)
             print pred
             print sec
             sum += measurePrediction.compare(pred, sec)
