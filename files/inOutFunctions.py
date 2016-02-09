@@ -28,9 +28,44 @@ def convert_input(sec, prim, sw):
         ins.append(np.array(inputs).flatten())
         outs.append(codes.alph[sec[j]])
     return (ins, outs)
+
+def merge_sequences(seq):
+    merged = []    
+    
+    length = len(seq[0])
+    for i in range(length):
+        merged.append(np.zeros(len(codes.aac)))
+    for s in seq:
+        for j in range(length):
+            if codes.aac.has_key(s[j]):
+                merged[j] += np.array(codes.aac[s[j]])
+            else:
+                merged[j] += np.array(codes.aac[codes.rest])
+            
+    return merged
+        
     
 def display_result(outputs, alphabet):
     result = ''
     for x in outputs:
         result += alphabet[x]
     return result
+
+def convert_inputX(sec, prim, sw):
+    length = len(sec)
+    sump = sum(prim[0])
+    
+    for q in range(sw/2):
+        prim.insert(0, sump*np.array(codes.aac[codes.rest]))
+        prim.append(sump*np.array(codes.aac[codes.rest]))
+    
+    ins = []
+    outs = []
+    
+    for j in range(length):
+        inputs = []
+        for k in range(j, j + sw):
+            inputs.append(prim[k])
+        ins.append(np.array(inputs).flatten())
+        outs.append(codes.alph[sec[j]])
+    return (ins, outs)

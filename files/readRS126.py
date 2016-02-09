@@ -11,9 +11,8 @@ from random import shuffle
 def readProteinFile(name):
     f = open(name, 'r')
 
-    primPrefix = 'OrigSeq:'
     secPrefix = 'dssp:'
-    prim = ''
+    prim = []
     sec = ''
     ln = ''
     
@@ -21,9 +20,10 @@ def readProteinFile(name):
         ln = f.readline()
         if ln == '':
             break
-    
-        if ln.startswith(primPrefix):
-            prim = ln[len(primPrefix):]
+        
+        if 'seq' in ln or 'Seq' in ln:
+            parts = ln.split(':')
+            prim.append(parts[1])
         
         if ln.startswith(secPrefix):
             sec = ln[len(secPrefix):]
@@ -37,14 +37,14 @@ def readProteinFile(name):
         else:
             secx += sec[i]
         
-    if len(secx) != len(prim):
+    if len(secx) != len(prim[0]):
         secx = secx[:-2] + '\n'
 
     return prim, secx
 
 path = 'RS126/';
 
-f = open('rs126.fa', 'w')
+f = open('RS126.fa', 'w')
 
 list_dir = []
 for x in os.listdir(path):
@@ -52,11 +52,12 @@ for x in os.listdir(path):
 
 shuffle(list_dir)
 
-for filename in list_dir:
-    f.write('>p,' + filename + '\n')
-    
+for filename in list_dir:   
     prim, sec = readProteinFile(path + filename)
-    f.write(prim)
+    f.write('>p,' + filename + '#' + str(len(prim))  + '\n')
+    
+    for p in prim:
+        f.write(p)
     f.write(sec)
     
 f.close()

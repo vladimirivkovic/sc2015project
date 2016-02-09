@@ -17,17 +17,30 @@ def make_SVM_3(sw, x, filename):
 
     #read dataset file
     f = open(filename, 'r')
+    
     for i in range(x):
-        f.readline()
-        prim = f.readline().strip()
+        desc = f.readline().strip()
+        primlen = int(desc.split('#')[1])
+        prim = []
+        
+        for j in range(primlen):
+            prim.append(f.readline().strip())
         sec = f.readline().strip()
-        ins, outs = inOutFunctions.convert_input(sec, prim, sw)
+        
+        #prim = prim[-1:]
+        
+        primx = inOutFunctions.merge_sequences(prim)
+        ins, outs = inOutFunctions.convert_inputX(sec, primx, sw)
+        
         for q in ins:
             inputs_train.append(q)
         for q in outs:
             outputs_train.append(q)
-
+    
     f.close()
+    
+    #print inputs_train
+    #print outputs_train
 
     clf = svm.SVC(C=1.5, gamma=0.1)
     clf.fit(inputs_train, outputs_train)
@@ -47,12 +60,19 @@ def test_SVM_3(clf, z, x, sw, filename):
     sovc, zc = 0, 0.01
 
     for i in range(x+z):
-        f.readline()
-        prim = f.readline().strip()
+        desc = f.readline().strip()
+        primlen = int(desc.split('#')[1])
+        prim = []
+        
+        for j in range(primlen):
+            prim.append(f.readline().strip())
         sec = f.readline().strip()
+        
+        prim = prim[-1:]
 
         if i >= x:
-            ins, outs = inOutFunctions.convert_input(sec, prim, sw)
+            primx = inOutFunctions.merge_sequences(prim)
+            ins, outs = inOutFunctions.convert_inputX(sec, primx, sw)
             pred = inOutFunctions.display_result(clf.predict(np.array(ins, np.float32)), codes.alphabeth)
             
             qh += measurePrediction.calcQ(pred, sec, 'H')
@@ -65,6 +85,9 @@ def test_SVM_3(clf, z, x, sw, filename):
             _sovh = measurePrediction.calcSOV(pred, sec, 'H')
             _sove = measurePrediction.calcSOV(pred, sec, 'E')
             _sovc = measurePrediction.calcSOV(pred, sec, 'C')
+            
+            #print sec
+            #print pred
             
             if _sovh != None:
                 sovh += _sovh

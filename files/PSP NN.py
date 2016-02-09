@@ -2,7 +2,7 @@ import nn3psp
 
 filename = 'rs126.fa'
 sw = 3
-x = 1
+x = 2
 
 nn = nn3psp.make_NN(sw, x, filename)
 

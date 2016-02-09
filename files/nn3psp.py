@@ -7,6 +7,7 @@ Created on Sat Feb 06 15:37:44 2016
 
 import inOutFunctions
 import measurePrediction
+import theano
 
 from keras.models import Sequential
 from keras.layers.core import Dense,Activation
@@ -36,14 +37,16 @@ def create_ann(hidden_neurons, sw):
     
     return ann
     
-def train_ann(ann, X_train, y_train):    
+def train_ann(ann, X_train, y_train):  
+    theano.exception_verbosity='high'  
+    
     X_train = np.array(X_train, np.float32)
     y_train = np.array(y_train, np.float32)
 
     sgd = SGD(lr=0.01, momentum=0.9)
     ann.compile(loss='mean_squared_error', optimizer=sgd)
 
-    ann.fit(X_train, y_train, nb_epoch=150, batch_size=1, verbose = 0, shuffle=False, show_accuracy = False) 
+    ann.fit(X_train, y_train, nb_epoch=150, batch_size=1, verbose = 0, validation_data=None, shuffle=False, show_accuracy = False) 
       
     return ann
 
@@ -56,14 +59,15 @@ def make_NN(sw, x, filename):
     #read dataset file
     f = open(filename, 'r')
     for i in range(x):
-        f.readline()
-        prim = f.readline().strip()
+        desc = f.readline().strip()
+        primlen = int(desc.split('#')[1])
+        prim = []
+        
+        for j in range(primlen):
+            prim.append(f.readline().strip())
         sec = f.readline().strip()
         
-        prim = 'APAF'
-        sec = 'CCEE'
-        
-        ins, outs = inOutFunctions.convert_input(sec, prim, sw)
+        ins, outs = inOutFunctions.convert_inputX(sec, prim, sw)
         for q in ins:
             inputs_train.append(q)
         for q in outs:
@@ -92,12 +96,16 @@ def test_NN(ann, z, x, sw, filename):
     sovc, zc = 0, 0.01
 
     for i in range(x+z):
-        f.readline()
-        prim = f.readline().strip()
+        desc = f.readline().strip()
+        primlen = int(desc.split('#')[1])
+        prim = []
+        
+        for j in range(primlen):
+            prim.append(f.readline().strip())
         sec = f.readline().strip()
 
         if i >= x:
-            ins, outs = inOutFunctions.convert_input(sec, prim, sw)
+            ins, outs = inOutFunctions.convert_inputX(sec, prim, sw)
             pred = inOutFunctions.display_result(ann.predict(np.array(ins, np.float32)), codes.alphabeth)
             print pred
             print sec
