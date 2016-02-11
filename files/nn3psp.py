@@ -12,6 +12,7 @@ import theano
 from keras.models import Sequential
 from keras.layers.core import Dense,Activation
 from keras.optimizers import SGD
+from keras.models import model_from_json
 
 import numpy as np
 import codes
@@ -87,7 +88,8 @@ def make_NN(sw, x, filename):
     
 def test_NN(ann, z, x, sw, filename):
     f = open(filename, 'r')
-    sum = 0    
+    sum = 0 
+    q3 = 0
     qh = 0
     qhp = 0
     qe = 0
@@ -111,13 +113,15 @@ def test_NN(ann, z, x, sw, filename):
             prim = inOutFunctions.merge_sequences(prim)
             ins, outs = inOutFunctions.convert_inputNN(sec, prim, sw)
             pred = ann.predict(np.array(ins, np.float32))
+            
             predx = []
             for p in pred:
                 predx.append(winner(p))
             pred = inOutFunctions.display_result(predx, codes.alphabeth)
-            print pred
-            print sec
+
             sum += measurePrediction.compare(pred, sec)
+            
+            q3 += measurePrediction.calcQ3(pred, sec)
             
             qh += measurePrediction.calcQ(pred, sec, 'H')
             qhp += measurePrediction.calcQpred(pred, sec, 'H')
@@ -142,4 +146,21 @@ def test_NN(ann, z, x, sw, filename):
     
     f.close()
 
-    return (qh/z, qhp/z, qe/z, qep/z, qc/z, qcp/z, sovh/zh, sove/ze, sovc/zc)
+    return (q3/z, qh/z, qhp/z, qe/z, qep/z, qc/z, qcp/z, sovh/zh, sove/ze, sovc/zc)
+
+def saveNN(ann, filename):
+    json_string = ann.to_json()
+    f = open(filename, 'w')
+    f.write(json_string)
+
+def loadNN(filename):
+    f = open(filename, 'r')
+    json_string = ''
+    
+    while True:
+        s = f.readline();
+        if s == '':
+            break
+        json_string += s
+    
+    return model_from_json(json_string)

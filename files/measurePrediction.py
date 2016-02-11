@@ -5,9 +5,11 @@ Created on Sun Jan 31 16:14:53 2016
 @author: Vlado
 """
 
+from math import sqrt
+
 def calcQ(pred, sec, struct):
-    correct = 1
-    observed = 1
+    correct = 1.0
+    observed = 1.0
     
     for i in range(len(pred)):
         if sec[i] == struct:
@@ -18,8 +20,8 @@ def calcQ(pred, sec, struct):
     return 100 * correct / observed
 
 def calcQpred(pred, sec, struct):
-    correct = 1
-    observed = 1
+    correct = 1.0
+    observed = 1.0
     
     for i in range(len(pred)):
         if pred[i] == struct:
@@ -28,6 +30,18 @@ def calcQpred(pred, sec, struct):
                 correct += 1
     
     return 100 * correct / observed
+
+def calcQ3(pred, sec):
+    predicted = {'H': 1.0, 'E':1.0, 'C':1.0}
+    observed = {'H': 1.0, 'E':1.0, 'C':1.0}
+    
+    for i in range(len(pred)):
+        observed[sec[i]] += 1
+        if pred[i] == sec[i]:
+            predicted[sec[i]] += 1
+        
+    return 100 * sum(predicted.values()) / sum(observed.values())
+    
     
 def compare(a, b):
     l = len(b)
@@ -91,3 +105,24 @@ def calcSOV(pred, sec, dssp):
     if N == 0:
         return None
     return sov/N * 100
+    
+def calcC(pred, sec, dssp):
+    p = 0.0
+    r = 0.0
+    u = 0.0
+    o = 0.0
+    
+    l = len(sec)
+    for i in range(l):
+        if sec[i] == dssp:
+            if pred[i] == dssp:
+                p += 1
+            else:
+                u += 1
+        else:
+            if pred[i] == dssp:
+                o += 1
+            else:
+                r += 1
+    
+    return 100 * (p*r - u*o)/sqrt((p+u)*(p+o)*(r+u)*(r+o))

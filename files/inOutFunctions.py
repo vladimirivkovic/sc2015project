@@ -88,3 +88,65 @@ def convert_inputNN(sec, prim, sw):
         ins.append(np.array(inputs).flatten())
         outs.append(codes.alphNN[sec[j]])
     return (ins, outs)
+
+def prepare_input_forX(sec, prim, sw, struct):
+    length = len(sec)
+    sump = sum(prim[0])
+    
+    for q in range(sw/2):
+        prim.insert(0, sump*np.array(codes.aac[codes.rest]))
+        prim.append(sump*np.array(codes.aac[codes.rest]))
+    
+    ins = []
+    outs = []
+    
+    for j in range(length):
+        inputs = []
+        for k in range(j, j + sw):
+            inputs.append(prim[k])
+        ins.append(np.array(inputs).flatten())
+        if sec[j] == struct:
+            outs.append(1)
+        else:
+            outs.append(0)
+    return (ins, outs)
+
+def getProteinDict(filename):
+    proteins = {}    
+    
+    f = open(filename, 'r')
+    
+    while True:
+        line = f.readline().strip()
+        if line == '':
+            break
+        
+        protName = line.split(',')[1].split('.')[0]
+        primlen = int(line.split('#')[1])
+        prim = []
+        
+        for j in range(primlen):
+            prim.append(f.readline().strip())
+        sec = f.readline().strip()
+        
+        proteins[protName] = {'prim': prim, 'sec': sec}
+    
+    f.close()
+    
+    return proteins
+
+def getGroups(filename):
+    f = open(filename, 'r')
+    
+    groups = []
+    
+    while True:
+        line = f.readline().strip()
+        if line == '':
+            break
+        
+        groups.append(line.split(','))
+    
+    f.close()
+    
+    return groups

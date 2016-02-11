@@ -1,0 +1,9 @@
+problem domain
+previous research and results
+prediction techniques
+datasets and formats
+structure of nn and svm - parameters
+validation techniques
+my results
+future plans
+conclusion

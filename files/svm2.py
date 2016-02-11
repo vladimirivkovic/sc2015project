@@ -76,32 +76,43 @@ def prepare_input_for2(sec, prim, sw, sx, sy, indexes):
         sec1 += sec[j]
     return (ins, outs, sec1)
 
-def make_SVM_1(sw, dssp, z, dataset):
+def make_SVM_1(sw, dssp, x, dataset):
     inputs_train = []
     outputs_train = []
 
+    #read dataset file
     f = open(dataset, 'r')
-    for i in range(z):
-        f.readline()
-        prim = f.readline().strip()
+    
+    for i in range(x):
+        desc = f.readline().strip()
+        primlen = int(desc.split('#')[1])
+        prim = []
+        
+        for j in range(primlen):
+            prim.append(f.readline().strip())
         sec = f.readline().strip()
-        ins, outs = prepare_input_for(sec, prim, sw, dssp)
+        
+        prim = prim[-2:]
+        
+        primx = inOutFunctions.merge_sequences(prim)
+        ins, outs = inOutFunctions.prepare_input_forX(sec, primx, sw, dssp)
+        
         for q in ins:
             inputs_train.append(q)
         for q in outs:
             outputs_train.append(q)
-
+    
     f.close()
 
-    clfx = svm.SVC(C=1.5, gamma=0.1)
-    clfx.fit(inputs_train, outputs_train)
+    clf = svm.SVC(C=2.5, gamma=0.05)
+    clf.fit(inputs_train, outputs_train)
     
-    return clfx
+    return clf
 
     
 sw = 7
 dssp = 'C'
-z = 70
+z = 100
 
 clfH = make_SVM_1(sw, dssp, z, 'rs126.fa')
 
@@ -112,13 +123,20 @@ def test_SMV_1(sw, dssp, w, clfx, z):
     cqp = 0
     
     for i in range(z+w):
-        f.readline()
-        prim = f.readline().strip()
+        desc = f.readline().strip()
+        primlen = int(desc.split('#')[1])
+        prim = []
+        
+        for j in range(primlen):
+            prim.append(f.readline().strip())
         sec = f.readline().strip()
+        
+        prim = prim[-2:]
 
+        if i >= z:
+            primx = inOutFunctions.merge_sequences(prim)
+            ins, outs = inOutFunctions.prepare_input_forX(sec, primx, sw, dssp)
 
-        if i > z:
-            ins, outs = prepare_input_for(sec, prim, sw, dssp)
             pred = inOutFunctions.display_result(clfx.predict(np.array(ins, np.float32)), {0:'X', 1:dssp})
             print sec
             print pred
