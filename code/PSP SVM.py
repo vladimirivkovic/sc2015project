@@ -10,9 +10,7 @@ protDict = inOutFunctions.getProteinDict(datasetFile)
 groups = inOutFunctions.getGroups(groupsFile)
 
 # sliding window
-for sw in range(9, 16, 2):
-    # number of samples for file
-    x = 6
+for sw in range(7, 16, 2):
     
     print 'sw = ' + str(sw)
     
@@ -20,10 +18,10 @@ for sw in range(9, 16, 2):
     trained = False
     
     for x in range(7):
-        if trained:
-            clf = svm3psp.loadSVM(filename)
-        else:
-            clf = svm3psp.make_SVM_3X(sw, protDict, groups, x)
+#        if trained:
+#            clf = svm3psp.loadSVM(filename)
+#        else:
+        clf = svm3psp.make_SVM_3X(sw, protDict, groups, x)
             #svm3psp.saveSVM(clf, filename)
         
     #    q3 = 0
@@ -36,6 +34,6 @@ for sw in range(9, 16, 2):
     #        q3 += rslt[0]
     #    
     #    print q3/30
-        print svm3psp.test_SVM_3X(clf, sw, protDict, groups, x)[0]
+        print svm3psp.test_SVM_3X(clf, sw, protDict, groups, x)
 
 

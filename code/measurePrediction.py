@@ -125,4 +125,7 @@ def calcC(pred, sec, dssp):
             else:
                 r += 1
     
+    if (p+u)*(p+o)*(r+u)*(r+o) == 0:
+        return 100
+    
     return 100 * (p*r - u*o)/sqrt((p+u)*(p+o)*(r+u)*(r+o))

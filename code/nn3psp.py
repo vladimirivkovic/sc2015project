@@ -7,7 +7,6 @@ Created on Sat Feb 06 15:37:44 2016
 
 import inOutFunctions
 import measurePrediction
-import theano
 
 from keras.models import Sequential
 from keras.layers.core import Dense,Activation
@@ -29,65 +28,29 @@ def convert_output(outputs):
 def winner(output):
     return max(enumerate(output), key=lambda x: x[1])[0]
     
-def create_ann(hidden_neurons, sw):   
+def create_ann(hidden_neurons, sw, id_dim):   
     ann = Sequential()
 
-    ann.add(Dense(input_dim=len(codes.aac)*sw, output_dim=hidden_neurons,init="glorot_uniform"))
+    ann.add(Dense(input_dim=id_dim*sw, output_dim=hidden_neurons,init="glorot_uniform"))
     ann.add(Activation("sigmoid"))
     ann.add(Dense(input_dim=hidden_neurons, output_dim=len(codes.alphabeth),init="glorot_uniform"))
     ann.add(Activation("sigmoid"))
     
     return ann
     
-def train_ann(ann, X_train, y_train):  
-    theano.exception_verbosity='high'  
-    
+def train_ann(ann, X_train, y_train):    
     X_train = np.array(X_train, np.float32)
     y_train = np.array(y_train, np.float32)
 
     sgd = SGD(lr=0.01, momentum=0.9)
     ann.compile(loss='mean_squared_error', optimizer=sgd)
 
-    ann.fit(X_train, y_train, nb_epoch=150, batch_size=1, verbose = 0, validation_data=None, shuffle=False, show_accuracy = False) 
+    ann.fit(X_train, y_train, nb_epoch=500, batch_size=1, verbose = 0, shuffle=False, show_accuracy = False) 
       
-    return ann
-
-def make_NN_(sw, x, filename):
-    ann = create_ann(2, sw)
-    
-    inputs_train = []
-    outputs_train = []
-
-    #read dataset file
-    f = open(filename, 'r')
-    for i in range(x):
-        desc = f.readline().strip()
-        primlen = int(desc.split('#')[1])
-        prim = []
-        
-        for j in range(primlen):
-            prim.append(f.readline().strip())
-        sec = f.readline().strip()
-        
-        prim = inOutFunctions.merge_sequences(prim)
-        
-        #prim = "ADTRIG"
-        #sec = "CCEEEE"
-        
-        ins, outs = inOutFunctions.convert_inputNN(sec, prim, sw)
-        for q in ins:
-            inputs_train.append(q)
-        for q in outs:
-            outputs_train.append(q)
-
-    f.close()
-
-    ann = train_ann(ann, inputs_train, outputs_train)
-    
     return ann
     
 def make_NN(sw, dataset, groups, without):
-    ann = create_ann(5, sw)
+    ann = create_ann(2, sw, len(codes.aac))
     
     inputs_train = []
     outputs_train = []
@@ -118,6 +81,38 @@ def make_NN(sw, dataset, groups, without):
     ann = train_ann(ann, inputs_train, outputs_train)
     
     return ann
+    
+def make_NN2(ann, sw, dataset, groups, without):
+    ann2 = create_ann(2, sw, 3)
+    
+    inputs_train = []
+    outputs_train = []
+    
+    protCodes = []
+    for s in groups[without]:
+        protCodes.append(s)
+
+    for p in protCodes:
+        
+        sec = dataset[p]['sec']
+        
+        prim = dataset[p]['prim']
+        
+        #prim = prim[-2:]
+        prim = inOutFunctions.merge_sequences(prim)
+        ins, outs = inOutFunctions.convert_inputNN(sec, prim, sw)
+        pred = ann.predict(np.array(ins, np.float32))
+        
+        ins, outs = inOutFunctions.convert_inputNN2(sec, pred, sw)
+        
+        for q in ins:
+            inputs_train.append(q)
+        for q in outs:
+            outputs_train.append(q)
+
+    ann2 = train_ann(ann2, inputs_train, outputs_train)
+    
+    return ann2
     
 def test_NN(ann, sw, dataset, groups, without):
     sum = 0 
@@ -180,8 +175,7 @@ def test_NN(ann, sw, dataset, groups, without):
     
     return (q3/z, qh/z, qhp/z, qe/z, qep/z, qc/z, qcp/z, sovh/zh, sove/ze, sovc/zc)
     
-def test_NN_(ann, z, x, sw, filename):
-    f = open(filename, 'r')
+def test_NN2(ann, ann2, sw, dataset, groups, without):
     sum = 0 
     q3 = 0
     qh = 0
@@ -193,53 +187,56 @@ def test_NN_(ann, z, x, sw, filename):
     sovh, zh = 0, 0.01
     sove, ze = 0, 0.01
     sovc, zc = 0, 0.01
+    z = 126/7
 
-    for i in range(x+z):
-        desc = f.readline().strip()
-        primlen = int(desc.split('#')[1])
-        prim = []
+    protCodes = []
+    for s in groups[without]:
+        protCodes.append(s)
+
+    for p in protCodes:
         
-        for j in range(primlen):
-            prim.append(f.readline().strip())
-        sec = f.readline().strip()
+        sec = dataset[p]['sec']
+        
+        prim = dataset[p]['prim']
+        
+        #prim = prim[-2:]
+        prim = inOutFunctions.merge_sequences(prim)
+        ins, outs = inOutFunctions.convert_inputNN(sec, prim, sw)
+        pred = ann.predict(np.array(ins, np.float32))
+        
+        ins, outs = inOutFunctions.convert_inputNN2(sec, pred, sw)
+        pred = ann2.predict(np.array(ins, np.float32))
+        
+        predx = []
+        for p in pred:
+            predx.append(winner(p))
+        pred = inOutFunctions.display_result(predx, codes.alphabeth)
 
-        if i >= x:
-            prim = inOutFunctions.merge_sequences(prim)
-            ins, outs = inOutFunctions.convert_inputNN(sec, prim, sw)
-            pred = ann.predict(np.array(ins, np.float32))
-            
-            predx = []
-            for p in pred:
-                predx.append(winner(p))
-            pred = inOutFunctions.display_result(predx, codes.alphabeth)
-
-            sum += measurePrediction.compare(pred, sec)
-            
-            q3 += measurePrediction.calcQ3(pred, sec)
-            
-            qh += measurePrediction.calcQ(pred, sec, 'H')
-            qhp += measurePrediction.calcQpred(pred, sec, 'H')
-            qe += measurePrediction.calcQ(pred, sec, 'E')
-            qep += measurePrediction.calcQpred(pred, sec, 'E')
-            qc += measurePrediction.calcQ(pred, sec, 'C')
-            qcp += measurePrediction.calcQpred(pred, sec, 'C')
-            
-            _sovh = measurePrediction.calcSOV(pred, sec, 'H')
-            _sove = measurePrediction.calcSOV(pred, sec, 'E')
-            _sovc = measurePrediction.calcSOV(pred, sec, 'C')
-            
-            if _sovh != None:
-                sovh += _sovh
-                zh += 1
-            if _sove != None:
-                sove += _sove
-                ze += 1
-            if _sovc != None:
-                sovc += _sovc
-                zc += 1
+        sum += measurePrediction.compare(pred, sec)
+        
+        q3 += measurePrediction.calcQ3(pred, sec)
+        
+        qh += measurePrediction.calcQ(pred, sec, 'H')
+        qhp += measurePrediction.calcQpred(pred, sec, 'H')
+        qe += measurePrediction.calcQ(pred, sec, 'E')
+        qep += measurePrediction.calcQpred(pred, sec, 'E')
+        qc += measurePrediction.calcQ(pred, sec, 'C')
+        qcp += measurePrediction.calcQpred(pred, sec, 'C')
+        
+        _sovh = measurePrediction.calcSOV(pred, sec, 'H')
+        _sove = measurePrediction.calcSOV(pred, sec, 'E')
+        _sovc = measurePrediction.calcSOV(pred, sec, 'C')
+        
+        if _sovh != None:
+            sovh += _sovh
+            zh += 1
+        if _sove != None:
+            sove += _sove
+            ze += 1
+        if _sovc != None:
+            sovc += _sovc
+            zc += 1
     
-    f.close()
-
     return (q3/z, qh/z, qhp/z, qe/z, qep/z, qc/z, qcp/z, sovh/zh, sove/ze, sovc/zc)
 
 def saveNN(ann, filename):

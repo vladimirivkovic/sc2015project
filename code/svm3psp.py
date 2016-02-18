@@ -42,7 +42,7 @@ def make_SVM_3(sw, x, filename):
     #print inputs_train
     #print outputs_train
 
-    clf = svm.SVC(C=1.5, gamma=0.1)
+    clf = svm.SVC(C=2.5, gamma=0.05)
     clf.fit(inputs_train, outputs_train)
     
     return clf
@@ -101,7 +101,7 @@ def test_SVM_3(clf, z, x, sw, filename):
             prim.append(f.readline().strip())
         sec = f.readline().strip()
         
-        prim = prim[-2:]
+        #prim = prim[-2:]
 
         if i >= x:
             primx = inOutFunctions.merge_sequences(prim)
@@ -160,7 +160,7 @@ def test_SVM_3X(clf, sw, dataset, groups, without):
         
         prim = dataset[p]['prim']
         
-        prim = prim[-2:]
+        #prim = prim[-2:]
 
         primx = inOutFunctions.merge_sequences(prim)
         ins, outs = inOutFunctions.convert_inputX(sec, primx, sw)

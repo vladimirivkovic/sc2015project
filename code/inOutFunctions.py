@@ -41,6 +41,9 @@ def merge_sequences(seq):
                 merged[j] += np.array(codes.aac[s[j]])
             else:
                 merged[j] += np.array(codes.aac[codes.rest])
+    
+    for j in range(length):
+        merged[j] /= float(len(seq));
             
     return merged
         
@@ -77,6 +80,25 @@ def convert_inputNN(sec, prim, sw):
     for q in range(sw/2):
         prim.insert(0, sump*np.array(codes.aac[codes.rest]))
         prim.append(sump*np.array(codes.aac[codes.rest]))
+    
+    ins = []
+    outs = []
+    
+    for j in range(length):
+        inputs = []
+        for k in range(j, j + sw):
+            inputs.append(prim[k])
+        ins.append(np.array(inputs).flatten())
+        outs.append(codes.alphNN[sec[j]])
+    return (ins, outs)
+
+def convert_inputNN2(sec, prim, sw):
+    length = len(sec)
+    sump = sum(prim[0])
+    
+    for q in range(sw/2):
+        prim.insert(0, sump*np.array([0,0,0]))
+        prim.append(sump*np.array([0,0,0]))
     
     ins = []
     outs = []

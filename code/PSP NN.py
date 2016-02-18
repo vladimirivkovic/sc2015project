@@ -12,8 +12,9 @@ groups = inOutFunctions.getGroups(groupsFile)
 #    print 'sw = ' + str(sw)
 #    
 #    for x in range(7):
-sw, x = 11, 4
-
-ann = nn3psp.make_NN(sw, protDict, groups, x)
-
-print nn3psp.test_NN(ann, sw, protDict, groups, x)
+sw, x = 7, 3
+for x in range(7):
+    print x
+    ann = nn3psp.make_NN(sw, protDict, groups, x)
+    
+    print nn3psp.test_NN(ann, sw, protDict, groups, x)
