@@ -1,9 +1,0 @@
-problems with datasets
-single sequence - bad results
-multiple sequence - better
-sliding window
-coding
-training params
-SOV - measure
-7-fold cross validation
-PSSM profiles

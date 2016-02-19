@@ -92,7 +92,7 @@ def make_SVM_1(sw, dssp, x, dataset):
             prim.append(f.readline().strip())
         sec = f.readline().strip()
         
-        prim = prim[-2:]
+        #prim = prim[-2:]
         
         primx = inOutFunctions.merge_sequences(prim)
         ins, outs = inOutFunctions.prepare_input_forX(sec, primx, sw, dssp)
@@ -131,7 +131,7 @@ def test_SMV_1(sw, dssp, w, clfx, z):
             prim.append(f.readline().strip())
         sec = f.readline().strip()
         
-        prim = prim[-2:]
+        #prim = prim[-2:]
 
         if i >= z:
             primx = inOutFunctions.merge_sequences(prim)
@@ -146,7 +146,7 @@ def test_SMV_1(sw, dssp, w, clfx, z):
 
     return (cq/w, cqp/w)
 
-w = 10
+w = 26
 print test_SMV_1(sw, dssp, w, clfH, z)
 
 #inputs_train = []

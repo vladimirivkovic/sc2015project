@@ -55,6 +55,9 @@ def test_SMV_2(clf, sw, dataset, groups, without, dssp):
     cq = 0
     cqp = 0
     cc = 0
+    sov = 0
+    q = 18
+    qq = 0
     
     protCodes = []
     for s in groups[without]:
@@ -79,8 +82,13 @@ def test_SMV_2(clf, sw, dataset, groups, without, dssp):
         cq += measurePrediction.calcQ(pred, sec, dssp)
         cqp += measurePrediction.calcQpred(pred, sec, dssp)
         cc += measurePrediction.calcC(pred, sec, dssp)
+        sovx = measurePrediction.calcSOV(pred, sec, dssp)
+        
+        if sovx != None:
+            sov += sovx
+            qq += 1
 
-    return (cq/18, cqp/18, cc/18)
+    return (cq/q, cqp/q, cc/q, sov/qq)
 
 for sw in range(7,17,2):
     print "sw = " + str(sw)
